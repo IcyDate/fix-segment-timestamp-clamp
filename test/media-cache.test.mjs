@@ -36,7 +36,7 @@ function fixture(t, options = {}) {
               pages: [{ page: 1, cid: 7, duration: 60 }],
             },
           });
-        if (path === "/x/player/wbi/v2")
+        if (path === "/x/player/v2")
           return json({
             code: 0,
             data: {
@@ -296,7 +296,7 @@ test("registered DSH read, import and source tools preserve the reused ASR ID an
         code: 0,
         data: { pages: [{ page: 1, cid: 7, duration: 60 }] },
       });
-    if (path === "/x/player/wbi/v2")
+    if (path === "/x/player/v2")
       return json({ code: 0, data: { subtitle: { subtitles: [] } } });
     assert.fail("Unexpected synthetic tool endpoint");
   };

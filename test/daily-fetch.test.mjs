@@ -74,7 +74,7 @@ function fixture(t, config = {}, options = {}) {
               ],
             },
           });
-        if (parsed.pathname === "/x/player/wbi/v2")
+        if (parsed.pathname === "/x/player/v2")
           return json({
             code: 0,
             data: {

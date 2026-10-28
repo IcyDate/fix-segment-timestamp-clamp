@@ -69,7 +69,7 @@ function fixture(t, options = {}) {
               pages: [{ page: 1, cid: 7, duration: 4 }],
             },
           });
-        if (path === "/x/player/wbi/v2")
+        if (path === "/x/player/v2")
           return json({ code: 0, data: { subtitle: { subtitles: [] } } });
         if (path === "/x/player/playurl")
           return json({
@@ -501,7 +501,7 @@ test("auto read can return text with explicit unavailable images but never swall
         code: 0,
         data: { owner: { mid: 1 }, pages: [{ page: 1, cid: 7, duration: 4 }] },
       });
-    if (path === "/x/player/wbi/v2") return json({ code: 0, data: {} });
+    if (path === "/x/player/v2") return json({ code: 0, data: {} });
     return new Response("", { status: 412 });
   };
   await assert.rejects(

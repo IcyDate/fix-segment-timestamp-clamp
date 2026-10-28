@@ -1,6 +1,8 @@
 # DSH B站内容学习插件
 
-[v1.11.1](https://github.com/InariNGT-Ofiicial/dsh-bili-humanism/releases/tag/v1.11.1) · 补齐凭据缺失提示、响应字节预算诊断与生效状态。
+[v1.11.2](https://github.com/InariNGT-Ofiicial/dsh-bili-humanism/releases/tag/v1.11.2) · 修复字幕读取入口与对应白名单，保留原有预算和风险暂停。
+
+针对反馈 #13，字幕信息读取改用固定 `/x/player/v2` 并补齐精确白名单，避免向 WBI 变体发送未签名请求；风险暂停仍立即停止并持久保存。验证范围与升级/回滚边界见[字幕入口修复说明](docs/PLAYER_ENDPOINT.md)。
 
 兼容维护：修复卸载后未关闭账本与调度器的问题，同时支持 **DSH 0.2.1-rc.2 / rc.3**，保留旧版用法与设置。验证范围与复现见 [DSH 兼容说明](docs/DSH_COMPATIBILITY.md)。
 

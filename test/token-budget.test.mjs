@@ -44,7 +44,7 @@ function sourceFetcher(state) {
           duration: 60,
         },
       });
-    if (path === "/x/player/wbi/v2")
+    if (path === "/x/player/v2")
       return reply({
         code: 0,
         data: {

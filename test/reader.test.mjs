@@ -8,7 +8,7 @@ import { digest } from "../lib/store.mjs";
 
 const bv = "BV0000000001";
 const secret = "SYNTHETIC_READER_COOKIE";
-const player = "/x/player/wbi/v2";
+const player = "/x/player/v2";
 const conclusion = "/x/web-interface/view/conclusion/get";
 const subtitle = "/synthetic-reader.json";
 const response = (body, status = 200) =>

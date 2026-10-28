@@ -44,7 +44,7 @@ function fixture(t, duration = 927, config = {}) {
               pages: [{ page: 1, cid: 7, duration }],
             },
           });
-        if (path === "/x/player/wbi/v2")
+        if (path === "/x/player/v2")
           return json({
             code: 0,
             data: {
