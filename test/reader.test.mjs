@@ -39,7 +39,7 @@ function fixture(t, options = {}) {
             data: {
               title: "Synthetic reader fixture",
               owner: { name: "Synthetic author", mid: 1 },
-              pages: [{ page: 1, cid: 7, duration: 60 }],
+              pages: [{ page: 1, cid: 7, duration: options.duration ?? 60 }],
             },
           });
         if (path === player)
@@ -305,6 +305,27 @@ test("a track whose every line starts past the part is still rejected", async (t
     service.read(bv),
     (error) => error.code === "INVALID_TIMESTAMP",
   );
+});
+
+test("a track that runs past twice the part is not clamped into that part", async (t) => {
+  // Observed shapes: an 11 s part carrying a lone 27 s ad line, and the same
+  // part carrying a 1202 s track that belongs to some other video. Clamping
+  // either one would report unrelated text as this part's captions, so the
+  // mismatch stays a loud failure instead of becoming a plausible transcript.
+  for (const trackBody of [
+    [{ from: 0.397, to: 27.425, content: "Synthetic ad line" }],
+    Array.from({ length: 12 }, (_, i) => ({
+      from: i * 100,
+      to: i * 100 + 100,
+      content: `Synthetic foreign line ${i}`,
+    })),
+  ]) {
+    const { service } = fixture(t, { duration: 11, trackBody });
+    await assert.rejects(
+      service.read(bv),
+      (error) => error.code === "INVALID_TIMESTAMP",
+    );
+  }
 });
 
 test("unreadable subtitle timestamps still fail the reading", async (t) => {
