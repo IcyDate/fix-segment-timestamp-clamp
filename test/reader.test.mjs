@@ -60,15 +60,17 @@ function fixture(t, options = {}) {
           });
         if (path === subtitle)
           return response({
-            body: options.emptyTrack
-              ? []
-              : [
-                  {
-                    from: 0,
-                    to: 58,
-                    content: "Synthetic detailed subtitle with later evidence",
-                  },
-                ],
+            body:
+              options.trackBody ??
+              (options.emptyTrack
+                ? []
+                : [
+                    {
+                      from: 0,
+                      to: 58,
+                      content: "Synthetic detailed subtitle with later evidence",
+                    },
+                  ]),
           });
         if (path === "/x/web-interface/nav")
           return response({
@@ -263,4 +265,56 @@ test("old A2 cache is bypassed while stored readings and new cache remain usable
   assert.equal(second.result.id, first.result.id);
   assert.equal(second.result.cached, true);
   assert.equal(second.usage.requests, 0);
+});
+
+test("subtitle lines past the part duration are clamped instead of failing the whole track", async (t) => {
+  // The metadata duration can understate the real length and generated tracks
+  // pad their tail: here 43 of 133 synthetic lines start beyond the +5s
+  // tolerance of the 60s part. A track that is mostly placeable must keep its
+  // readable text instead of failing the whole reading.
+  const trackBody = Array.from({ length: 133 }, (_, i) =>
+    i < 90
+      ? { from: i * 0.6, to: i * 0.6 + 0.6, content: `Synthetic line ${i}` }
+      : {
+          from: 65 + (i - 90) * 0.12,
+          to: 65 + (i - 90) * 0.12 + 0.12,
+          content: `Synthetic line ${i}`,
+        },
+  );
+  const { service } = fixture(t, { trackBody });
+  const read = await service.read(bv);
+  assert.equal(read.result.route, "A1");
+  assert.equal(read.result.coverage.state, "partial");
+  assert.equal(read.result.segments.length, 133);
+  for (const s of read.result.segments) {
+    assert.ok(s.start >= 0 && s.start <= 60, `start ${s.start} escaped the part`);
+    assert.ok(s.end >= s.start && s.end <= 60, `end ${s.end} escaped the part`);
+  }
+  assert.equal(read.result.segments.filter((s) => s.start === 60).length, 43);
+  assert.ok(read.result.coverage.timed_fraction <= 1);
+});
+
+test("a track whose every line starts past the part is still rejected", async (t) => {
+  const { service } = fixture(t, {
+    trackBody: [
+      { from: 500, to: 600, content: "Synthetic wrong-file line" },
+      { from: 700, to: 800, content: "Synthetic wrong-file line" },
+    ],
+  });
+  await assert.rejects(
+    service.read(bv),
+    (error) => error.code === "INVALID_TIMESTAMP",
+  );
+});
+
+test("unreadable subtitle timestamps still fail the reading", async (t) => {
+  for (const from of ["not-a-number", -1]) {
+    const { service } = fixture(t, {
+      trackBody: [{ from, to: 1, content: "Synthetic unreadable line" }],
+    });
+    await assert.rejects(
+      service.read(bv),
+      (error) => error.code === "INVALID_TIMESTAMP",
+    );
+  }
 });
